@@ -22,6 +22,7 @@ const DOCS_URL = 'https://github.com/natemoo93/LCNAF2Wiki-extension';
 const GRANTS_URL = 'https://meta.wikimedia.org/wiki/Special:OAuthManageMyGrants';
 
 const romanizedToggle = document.getElementById('exclude-romanized');
+const viafToggle = document.getElementById('lookup-viaf');
 const saveRadios = document.querySelectorAll('input[name="save-method"]');
 const clientInput = document.getElementById('client-id');
 const accountState = document.getElementById('account-state');
@@ -53,6 +54,11 @@ async function init() {
   romanizedToggle.checked = settings.excludeRomanized;
   romanizedToggle.addEventListener('change', () => {
     setSetting('excludeRomanized', romanizedToggle.checked);
+  });
+
+  viafToggle.checked = settings.lookupViaf;
+  viafToggle.addEventListener('change', () => {
+    setSetting('lookupViaf', viafToggle.checked);
   });
 
   for (const radio of saveRadios) {

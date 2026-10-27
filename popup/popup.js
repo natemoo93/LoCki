@@ -6,7 +6,8 @@
 import { fetchRecord, findIdByHeading } from '../core/lcClient.js';
 import { parseMarcXml } from '../core/marc.js';
 import { extractFields, headingFromUrl, idFromUrl, normalizeId } from '../core/extract.js';
-import { mapRecord } from '../core/mapper.js';
+import { mapRecord, withViaf } from '../core/mapper.js';
+import { lookupViaf } from '../core/viaf.js';
 import { toQuickStatements } from '../core/quickstatements.js';
 import { newItemUrl } from '../core/newitem.js';
 import { findByViaf, findDuplicates } from '../core/wikidata.js';
@@ -148,10 +149,15 @@ async function lookup(id) {
 
     const rec = parseMarcXml(xml, id);
     const settings = await getSettings();
-    const draft = mapRecord(rec, {
+    let draft = mapRecord(rec, {
       textFilters: settings.textFilters,
       excludeRomanized: settings.excludeRomanized,
     });
+    // Most records have no VIAF number in 024. Get it from VIAF if the setting is on.
+    if (settings.lookupViaf && !draft.viafId) {
+      draft = withViaf(draft, await lookupViaf(rec.id, { signal: ctl.signal }));
+      if (ctl.signal.aborted) return;
+    }
     renderRecord(extractFields(rec), draft, settings);
   } catch (err) {
     if (ctl.signal.aborted || err.name === 'AbortError') return;
@@ -570,6 +576,17 @@ async function guardCreate(button, draft, stage, readDraft, onEdit) {
   if (result.status === 'none') {
     const byName = await findNameMatches(draft);
     const [first] = byName.items;
+
+    // The name matches with or without diacritics, and the dates are identical.
+    if (byName.status === 'duplicate' && first?.url) {
+      const found = byName.items.map((i) => i.id).join(', ');
+      await offerExisting(button, stage, readDraft, onEdit, {
+        itemId: first.id,
+        url: first.url,
+        title: `Wikidata has this item as ${found}. The name "${first.label}" and the dates (${first.birth}–${first.death}) match.`,
+      });
+      return;
+    }
 
     if (byName.status === 'possible' && first?.url) {
       const found = byName.items.map((i) => i.id).join(', ');

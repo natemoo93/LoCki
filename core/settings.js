@@ -8,6 +8,7 @@ import { cleanFilters } from './filters.js';
 /** The default value of each setting. */
 export const DEFAULTS = {
   excludeRomanized: false,
+  lookupViaf: true,
   saveMethod: 'api',
   textFilters: [],
 };
@@ -51,6 +52,7 @@ function clean(s) {
   return {
     excludeRomanized:
       typeof s.excludeRomanized === 'boolean' ? s.excludeRomanized : DEFAULTS.excludeRomanized,
+    lookupViaf: typeof s.lookupViaf === 'boolean' ? s.lookupViaf : DEFAULTS.lookupViaf,
     saveMethod: SAVE_METHODS.includes(s.saveMethod) ? s.saveMethod : DEFAULTS.saveMethod,
     textFilters: cleanFilters(s.textFilters),
   };

@@ -1,6 +1,6 @@
 /**
  * Find Wikidata items by name and dates, for records that the P244 search does not find.
- * A match is evidence, not proof. A person must examine it.
+ * A match with identical dates is a duplicate. A match in the year tolerance is evidence only.
  */
 
 import { USER_AGENT } from './wikidata.js';
@@ -22,15 +22,15 @@ export const YEAR_TOLERANCE = 1;
 
 /**
  * @typedef {{
- *   status: 'none' | 'possible' | 'skipped' | 'error',
- *   items: {id: string, url: string, label: string, birth: number, death: number}[],
+ *   status: 'none' | 'possible' | 'duplicate' | 'skipped' | 'error',
+ *   items: {id: string, url: string, label: string, birth: number, death: number, exact: boolean}[],
  *   detail?: string
  * }} NameMatchResult
  */
 
 /**
  * Find an item with this name, these two years, and no P244.
- * This function does not throw. A failure gives the status 'error'.
+ * Search for the name with and without diacritics. This function does not throw. A failure gives the status 'error'.
  * @param {{label: string, birth?: {year: number}, death?: {year: number}}} draft
  * @param {{signal?: AbortSignal}} [opts]
  * @returns {Promise<NameMatchResult>}
@@ -45,7 +45,7 @@ export async function findNameMatches(draft, opts = {}) {
     return { status: 'skipped', items: [], detail: 'The check needs a name, a birth year, and a death year.' };
   }
 
-  const query = buildQuery(label, birth, death);
+  const query = buildQuery(nameForms(label), birth, death);
   const url = `${SPARQL}?format=json&query=${encodeURIComponent(query)}`;
 
   const timer = new AbortController();
@@ -73,7 +73,9 @@ export async function findNameMatches(draft, opts = {}) {
     const rows = data?.results?.bindings ?? [];
     if (rows.length === 0) return { status: 'none', items: [] };
 
-    return { status: 'possible', items: rows.map(toItem).filter(Boolean) };
+    const items = uniqueItems(rows.map((r) => toItem(r, draft)).filter(Boolean));
+    const exact = items.filter((i) => i.exact);
+    return exact.length ? { status: 'duplicate', items: exact } : { status: 'possible', items };
   } catch (cause) {
     if (cause?.name === 'AbortError') {
       const stopped = opts.signal?.aborted;
@@ -90,17 +92,40 @@ export async function findNameMatches(draft, opts = {}) {
 }
 
 /**
- * Make the SPARQL query. The label must match exactly and the years must be in tolerance.
- * Exclude an item that has P244.
+ * Get the name and, if it is different, the name without diacritics.
  * @param {string} label
+ * @returns {string[]}
+ */
+export function nameForms(label) {
+  const plain = stripDiacritics(label);
+  return plain === label ? [label] : [label, plain];
+}
+
+/**
+ * Remove the combining marks and the ALA-LC modifier letters from a name.
+ * @param {string} name
+ * @returns {string}
+ */
+export function stripDiacritics(name) {
+  return String(name ?? '')
+    .normalize('NFD')
+    .replace(/[\p{M}ʹ-ʼ]/gu, '')
+    .normalize('NFC');
+}
+
+/**
+ * Make the SPARQL query. One label must match exactly and the years must be in tolerance.
+ * Exclude an item that has P244.
+ * @param {string | string[]} labels
  * @param {number} birth
  * @param {number} death
  * @returns {string}
  */
-export function buildQuery(label, birth, death) {
-  const name = sparqlString(label);
-  return `SELECT ?item ?itemLabel ?birth ?death WHERE {
-  ?item rdfs:label ${name}@en .
+export function buildQuery(labels, birth, death) {
+  const names = [].concat(labels).map((l) => `${sparqlString(l)}@en`).join(' ');
+  return `SELECT ?item ?itemLabel ?birth ?death ?birthDate ?deathDate WHERE {
+  VALUES ?name { ${names} }
+  ?item rdfs:label ?name .
   ?item wdt:P31 wd:Q5 .
   ?item wdt:P569 ?birthDate .
   ?item wdt:P570 ?deathDate .
@@ -138,9 +163,11 @@ function sparqlString(value) {
 
 /**
  * Change one result row into an item. Return undefined if the row has no usable item URI.
+ * The item is exact if both dates are identical to the record dates.
  * @param {object} row
+ * @param {{birth?: object, death?: object}} draft
  */
-function toItem(row) {
+function toItem(row, draft) {
   const uri = row?.item?.value ?? '';
   const id = uri.split('/').pop();
   if (!/^Q\d+$/.test(id ?? '')) return undefined;
@@ -151,7 +178,37 @@ function toItem(row) {
     label: row?.itemLabel?.value ?? '',
     birth: Number(row?.birth?.value),
     death: Number(row?.death?.value),
+    exact: sameDate(draft.birth, row?.birthDate?.value) && sameDate(draft.death, row?.deathDate?.value),
   };
+}
+
+/**
+ * Keep one item for each ID. Keep the exact item if there is one.
+ * An item with two birth dates gives two rows.
+ * @param {object[]} items
+ */
+function uniqueItems(items) {
+  const byId = new Map();
+  for (const item of items) {
+    if (!byId.has(item.id) || item.exact) byId.set(item.id, item);
+  }
+  return [...byId.values()];
+}
+
+/**
+ * Return true if a Wikidata date is identical to a record date at the precision of the record.
+ * A circa date is never identical.
+ * @param {{year: number, month?: number, day?: number, circa?: boolean} | undefined} date
+ * @param {string | undefined} value a Wikidata time, such as "1835-11-30T00:00:00Z"
+ * @returns {boolean}
+ */
+export function sameDate(date, value) {
+  const m = String(value ?? '').match(/^([+-]?\d+)-(\d{2})-(\d{2})/);
+  if (!date || date.circa || !m) return false;
+  if (Number(m[1]) !== date.year) return false;
+  if (date.month !== undefined && Number(m[2]) !== date.month) return false;
+  if (date.day !== undefined && Number(m[3]) !== date.day) return false;
+  return true;
 }
 
 /**

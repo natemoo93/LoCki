@@ -7,7 +7,7 @@ import { datafields, subfields, subfield, indicators } from './marc.js';
 import { invertName, looksRomanized } from './names.js';
 import { describeFromOccupations, isAwkwardTerm, normalizeOccupation } from './normalize.js';
 import { extractDates, formatDateParens, PRIVACY_BIRTH_YEAR } from './dates.js';
-import { statementIds, viafId, wikidataId } from './identifiers.js';
+import { statementIds, viafId, viafStatement, wikidataId } from './identifiers.js';
 import { applyFilters } from './filters.js';
 import { demonymFor } from './demonyms.js';
 
@@ -69,6 +69,23 @@ export function mapRecord(rec, opts = {}) {
     descriptionSource,
     warnings,
     source: rec.source,
+  };
+}
+
+/**
+ * Add a VIAF cluster number from VIAF to a draft that has none from 024.
+ * Do not change a draft that has a VIAF number. Ignore a value that Wikidata does not accept.
+ * @param {WikidataDraft} draft
+ * @param {string | undefined} viaf
+ * @returns {WikidataDraft}
+ */
+export function withViaf(draft, viaf) {
+  const statement = viafStatement(viaf);
+  if (draft.viafId || !statement) return draft;
+  return {
+    ...draft,
+    viafId: statement.value,
+    identifiers: [...(draft.identifiers ?? []), statement],
   };
 }
 

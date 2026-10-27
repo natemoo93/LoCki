@@ -112,6 +112,17 @@ function normalizeId(source, value) {
 }
 
 /**
+ * Get the P214 statement for a VIAF cluster number from a source other than 024.
+ * Return undefined if Wikidata does not accept the value.
+ * @param {string} value
+ * @returns {{property: string, value: string} | undefined}
+ */
+export function viafStatement(value) {
+  const id = normalizeViaf(value);
+  return id && FORMATS.P214.test(id) ? { property: 'P214', value: id } : undefined;
+}
+
+/**
  * Get the VIAF cluster number, if the record has one.
  * @param {object} rec
  * @returns {string | undefined}
