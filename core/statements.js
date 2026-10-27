@@ -126,7 +126,7 @@ export function buildItemBody(draft, opts = {}) {
     item,
     // A watchlist shows the comment. It names the source record.
     comment: draft.lcnafId
-      ? `Created from LCNAF ${draft.lcnafId} with LCNAF2Wiki`
-      : 'Created with LCNAF2Wiki',
+      ? `Created from LCNAF ${draft.lcnafId} with LoCki`
+      : 'Created with LoCki',
   };
 }

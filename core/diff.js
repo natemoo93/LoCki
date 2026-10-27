@@ -196,7 +196,7 @@ export function buildAddPatch(diff, lang, lcnafId) {
 
   return {
     patch,
-    comment: lcnafId ? `Added from LCNAF ${lcnafId} with LCNAF2Wiki` : 'Added with LCNAF2Wiki',
+    comment: lcnafId ? `Added from LCNAF ${lcnafId} with LoCki` : 'Added with LoCki',
   };
 }
 

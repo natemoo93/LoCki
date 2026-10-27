@@ -68,7 +68,7 @@ export async function getItem(itemId, opts = {}) {
 export async function addStatement(itemId, statement, opts) {
   const body = {
     statement,
-    comment: opts.comment ?? 'Added with LCNAF2Wiki',
+    comment: opts.comment ?? 'Added with LoCki',
   };
 
   return request(
@@ -101,7 +101,7 @@ export async function patchItem(itemId, patch, opts = {}) {
 
   const body = {
     patch,
-    comment: opts.comment ?? 'Added with LCNAF2Wiki',
+    comment: opts.comment ?? 'Added with LoCki',
   };
 
   return request('PATCH', `/entities/items/${encodeURIComponent(itemId)}`, body, opts);

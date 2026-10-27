@@ -8,7 +8,7 @@ import { idFromUrl, normalizeId } from './extract.js';
 const BASE = 'https://id.loc.gov/authorities/names/';
 
 /** Identify the extension to LC, with a contact. */
-export const USER_AGENT = 'LCNAF2Wiki-prototype/0.1 (Northwestern University Library)';
+export const USER_AGENT = 'LoCki-prototype/0.1 (Northwestern University Library)';
 
 /**
  * Get one authority record as MARCXML.
