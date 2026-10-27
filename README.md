@@ -1,4 +1,4 @@
-# LCNAF2Wiki Browser Extension
+# LoCki Browser Extension
 
 Turns an LCNAF authority record into the fields needed to create a Wikidata item: **Label**, **Description**, **Aliases**, and language. Each field is editable in place and copyable, with QuickStatements output for the whole item.
 
@@ -11,7 +11,7 @@ One manifest serves both browsers. Chrome reads `background.service_worker`, Fir
 
 1. Open `chrome://extensions` (or `edge://extensions`).
 2. Turn on **Developer mode**.
-3. **Load unpacked** → select this `LCNAF2Wiki-extension/` folder.
+3. **Load unpacked** → select this `LoCki/` folder.
 4. Pin the extension so its toolbar button is visible.
 
 ### Firefox
@@ -92,7 +92,7 @@ A line with a green `+` is written. A grey line is not, and says why.
 
 ### Settings
 
-Settings can be adjusted on: **Extensions → LCNAF2Wiki → Details → Extension options**, or the **Settings** link in the popup footer. Changes save immediately and take effect on the next click.
+Settings can be adjusted on: **Extensions → LoCki → Details → Extension options**, or the **Settings** link in the popup footer. Changes save immediately and take effect on the next click.
 
 | Setting | Default | What it does |
 |---|---|---|
