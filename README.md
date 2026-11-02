@@ -1,6 +1,6 @@
 # LoCki
 
-LoCki is a browser extension that creates Wikidata-compatible information from an LCNAF name record.  If a record already exists for a person, LoCki detects it and offers to add to it.
+LoCki is a browser extension that creates Wikidata-compatible information from an LCNAF name record.  If a record already exists, LoCki detects it and offers to add to it.
 
 ## Install
 
@@ -41,7 +41,7 @@ A chip is yellow for these conditions:
 - `100` or `400` has a fuller form of the name (`$q`).
 - `400` has a title (`$c`).
 - `374` has more than one occupation.
-- `500` is in the record. LoCki does not use a related name. It can be a pseudonym or a different person.
+- `500` is in the record. Related names can be different people and require review.
 
 A chip is red for these conditions:
 
@@ -49,9 +49,9 @@ A chip is red for these conditions:
 - The record is a corporate name (`110`) or a meeting name (`111`).
 - `100` has a title (`$c`). Make sure that the title is in the correct position in the label.
 
-If a tag occurs more than one time, the chip shows the number (for example, `400 ×3`). Click a chip to show its fields and messages below the chips. Click the chip again to hide them. When the popup opens, it shows the first red chip. If there is no red chip, it shows the first yellow chip. If there is no yellow chip, it shows the first green chip.
+If a tag occurs more than one time, the chip shows the number (e.g. `400 ×3`). Click a chip to show its fields and messages below it, and click again to hide them. 
 
-The chips show the record as LC sent it. Text filters do not change the chips.
+The chips show the record as LC sent it. Text filters do not alter the chips.
 
 ## Diff panel
 
@@ -60,17 +60,19 @@ When you click **Create in Wikidata** or **Add to Q...**, LoCki shows a diff pan
 | Line | Meaning |
 |---|---|
 | Green `+` with a checkmark | LoCki writes this value. |
-| Green `+` without a checkmark | LoCki does not write this value. Select the checkbox to write it. |
-| Plain, with **Unchanged** | The item has this value or a different value for this field. LoCki does not change it. The panel shows the value that the item has. |
+| Green `+` without a checkmark | LoCki does not write this value. Click the checkbox to include it. |
+| Plain, with **Unchanged** | The item already has a value for this field. LoCki shows the value but does not change it. |
 
 These lines start without a checkmark:
 
 - **Aliases.** A `400` may be a romanization, an earlier form, or a form that is not correct. Select only the aliases that you can confirm.
-- **P1149 (LC class number).** A `053` number can be a range of class numbers. Make sure that the number is correct before you select it.
+- **P1149 (LC class number).** A `053` number can be a range of class numbers. Make sure that number/range is correct before you select it.
 
 All other additions start with a checkmark. On a new item, the label, the description, and the statements have no checkbox. On an item that already exists, each addition has a checkbox.
 
-If you edit a field while the panel is open, click **Refresh** to show the panel again with the edits. LoCki cannot create an item that has no label and no description.
+If you edit a field while the panel is open, click **Refresh** to show the panel again with the edits. 
+
+LoCki cannot create an item that has no label and no description.
 
 ## Data
 
@@ -92,9 +94,9 @@ Before you can create an item, LoCki searches Wikidata in this sequence:
 
 1. P244 with the LCCN.
 2. P214 with the VIAF number.
-3. The label (also without diacritics) and the birth and death years.
+3. The label (with or without diacritics) and the birth and death years.
 
-A match at step 1 or 2 is a duplicate. A match at step 3 with identical dates is a duplicate. A match at step 3 with a difference of one year or less is a possible match.
+A match at step 1 or 2 is a confirmed duplicate. A match at step 3 with identical dates is also considered a duplicate. A match at step 3 with a difference of one year or less is a possible match. 
 
 If LoCki finds a duplicate, the button changes to **Add to Q...** or **Entry exists**. **Add to Q...** adds only the data that the item does not have. LoCki does not remove or replace data on Wikidata.
 
@@ -112,7 +114,7 @@ Open **Settings** in the popup footer.
 
 ## Sign in
 
-Sign in to Wikidata on the settings page. If you do not sign in, Wikidata still records the edit, but with a temporary account.
+Sign in to Wikidata on the settings page. If you do not sign in, Wikidata still records the edit, but with a temporary anonymous account.
 
 ## Test
 
@@ -120,3 +122,8 @@ Sign in to Wikidata on the settings page. If you do not sign in, Wikidata still 
 npm install
 npm test
 ```
+## Acknowledgments
+
+LoCki was built by Nate Moore with support from Northwestern University Libraries.  
+
+Special thanks to Abby Dover and Jamie Carlstone for feedback and coordination.
