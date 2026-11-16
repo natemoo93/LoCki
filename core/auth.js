@@ -26,7 +26,7 @@ export const REGISTER_URL =
 const CHROMIUM_CLIENT_ID = 'b3cc168f7ec05538efb4842b4a6fe290';
 
 /** The OAuth client ID for Firefox. Firefox has a different callback URL, so it needs its own client. */
-const FIREFOX_CLIENT_ID = '';
+const FIREFOX_CLIENT_ID = 'd3db8e130b72d83a1070f0e3f295fd70';
 
 /** Storage key for a different client ID. Most users leave it empty. */
 const CLIENT_ID_KEY = 'oauthClientId';
